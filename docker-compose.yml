@@ -27,22 +27,23 @@ services:
     ### See https://github.com/namshi/docker-smtp for more SMTP configuration
     ### options for this image.
 
-  nginx:
-    image: nginx:alpine
-    container_name: asciinema_nginx
-    restart: unless-stopped
-    links:
-      - phoenix
-      - rails
-    ports:
-      - "3000:80"
-      ### Uncomment for HTTPS:
-      # - "443:443"
-    volumes:
-      - ./docker/nginx/asciinema.conf:/etc/nginx/conf.d/default.conf:ro
-      - ./volumes/cache:/cache
-      ### Uncomment for HTTPS (make sure to add your cert and private key to ./certs):
-      #  - ./certs:/app/priv/certs
+    #nginx:
+    #image: nginx:alpine
+    #container_name: asciinema_nginx
+    #restart: unless-stopped
+    #networks:
+    #  - reverseproxy
+    #  - default
+    #links:
+    #  - phoenix
+    #  - rails
+        #ports:
+        #- "3000:80"
+        #- "443:443"
+        #volumes:
+        #      - ./docker/nginx/asciinema.conf:/etc/nginx/conf.d/default.conf:ro
+        #  - ./volumes/cache:/cache
+        #  - ./certs:/app/priv/certs
     ### See https://hub.docker.com/_/nginx/ for more configuration options for
     ### this image.
 
@@ -52,6 +53,14 @@ services:
     command: mix phx.server
     container_name: asciinema_phoenix
     restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.backend=phoenix"
+      - "traefik.frontend.rule=Host:mwcm.ca"
+      - "traefik.docker.network=reverseproxy_reverseproxy"
+    networks:
+      - reverseproxy
+      - default
     links:
       - redis
       - postgres
@@ -79,3 +88,10 @@ services:
       - ./log:/app/log
       - /tmp/asciinema-web:/tmp
       - ./volumes/tmp:/app/tmp
+
+
+   
+networks:
+   reverseproxy:
+      external:
+         name: reverseproxy_reverseproxy
