@@ -27,13 +27,13 @@ services:
     ### See https://github.com/namshi/docker-smtp for more SMTP configuration
     ### options for this image.
 
-  nginx:
+  nginx_asciinema:
     image: nginx:alpine
     container_name: asciinema_nginx
     restart: unless-stopped
     labels:
       - "traefik.enable=true"
-      - "traefik.backend=nginx"
+      - "traefik.backend=nginx_asciinema"
       - "traefik.frontend.rule=Host:asciinema.mwcm.ca"
       - "traefik.docker.network=reverseproxy_reverseproxy"
     networks:
